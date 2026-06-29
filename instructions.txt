@@ -1,5 +1,36 @@
 Document that records my progress and understanding as this project moves ahead
+
 Phase 1: Understanding the Problem
 Predicting future activity for social media topics, eg expected no. of posts within the next interval
 Using historical posting activity, engagement metrics, timestamps. 
 Comparing accuracy of models by comparing forecasts with actual observations
+
+Phase 2:
+Step 1: Creating Project Structure
+social-trend-engine/
+│
+├── data/
+├── app/
+│ ├── producer.py
+│ └── consumer.py
+├── requirements.txt
+└── README.md
+
+Step 2: Install Redis
+Install Docker Desktop
+run in PowerShell: docker run -d --name redis-trends -p 6379:6379 redis
+run: docker ps
+
+Step 3: requirements.txt
+redis
+pandas
+faker
+I am choosing to execute this project via virtual env since it keeps things limited and compact 
+for a given project
+
+Initializing virtual env:
+py -m venv venv
+.\venv\Scripts\Activate.ps1
+
+Step 4: producer.py
+Generate fake social media posts and push them into Redis streams
