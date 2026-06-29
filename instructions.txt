@@ -22,7 +22,7 @@ run in PowerShell: docker run -d --name redis-trends -p 6379:6379 redis
 run: docker ps
 
 Step 3: requirements.txt
-redis
+redis: library that talks to Redis server
 pandas
 faker
 I am choosing to execute this project via virtual env since it keeps things limited and compact 
