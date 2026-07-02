@@ -40,3 +40,10 @@ Pushes he post to a Redis streams
 Repeats every second
 
 Step 5: consumer.py
+Connect to Redis server
+Read social_posts stream from ID "0"
+Wait for new posts using XREAD
+For each received post, call update_summary(post) to update hashtag stats
+Print current aggregated summary
+Update last_id so next xread fetches only newer posts
+Reapeat forever
