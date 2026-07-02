@@ -32,7 +32,7 @@ next_prediction = (
 
 # Merge everything
 results = next_prediction.merge(
-    latest_metrics
+    latest_metrics,
     on = "hashtag"
 )
 
