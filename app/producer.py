@@ -1,33 +1,18 @@
+# imports
 import redis
-from faker import Faker 
+from faker import Faker
 import random
 from datetime import datetime
 import time
 
+# Create a Faker object to generate realistic fake data
 fake = Faker()
 
-STREAM_NAME = "social_posts"
-def stream_posts():
-    while True:
-        post = generate_post()
-        stream_id = redis_client.xadd(
-            STREAM_NAME,
-            post
-        )
-        print(f"Sent: {stream_id} | {post['hashtag']}")
-        
-        time.sleep(1)
+# name of redis stream where posts will be stored
+STREAM_NAME  = "social_posts"
 
-
-# making a connection to Redis
-# redis_client = redis.Redis(
-#     host = "localhost",         # connecting to a service running on the same computer
-#     port=6379,                  # where we chose to run Redis
-#     decode_responses = True     # converts bytes into Python strings
-# )
-
-# dictionary of hashtags
-# values are weights/ prob of choosing each hashtag 
+# Hashtag Popularity
+# Assigned numbers act as weights, not %
 HASHTAG_POPULARITY = {
     "#AI": 35,
     "#Python": 25,
@@ -37,33 +22,52 @@ HASHTAG_POPULARITY = {
     "#Football": 5
 }
 
+# Possible media attached to a post
 MEDIA_TYPES = ["image", "video", "text"]
+
+# User Profiles
+# Each profile contains, follower count range
+# expected engagement rate range
+# if acc is verified
 
 USER_TYPES = {
     "casual": {
         "followers": (100, 5_000),
-        "engagement": (0.04, 0.10),
+        "engagement": (0.04, 0.10),  # 4% - 10%
         "verified": False
     },
     "creator": {
         "followers": (5_000, 100_000),
-        "engagement": (0.02, 0.06),
+        "engagement": (0.02, 0.06),  # 2% - 6%
         "verified": False
     },
-    "celebrity":{
+    "celebrity": {
         "followers": (100_000, 5_000_000),
-        "engagement": (0.01, 0.03),
+        "engagement": (0.01, 0.03),  # 1% - 3%
         "verified": True
     }
 }
 
+# Connecting to the Redis server
+# Redis Connection
+# Connect to the local Redis server
+# decode_response = True converts Redis bytes into Python strings
+
+redis_client = redis.Redis(
+    host = "localhost",         # Redis is running on the same machine
+    port = 6379,                # Default Redis port
+    decode_responses= True      # AUtomatically decode bytes into Python string
+)
+
 def generate_user():
+    # Generate a random user profile
     user_type = random.choices(
         list(USER_TYPES.keys()),
         weights=[80, 18, 2],
-        k=1
+        k = 1
     )[0]
     
+    # Retrieve settings for selected user type
     profile = USER_TYPES[user_type]
     
     return{
@@ -74,37 +78,42 @@ def generate_user():
         "country": fake.country()
     }
 
-# generating a function that returns realistic posts
 def generate_content():
-   
-    # picking on hashtag
+    # Generate the content of a social media post
+    
+    # chooe a hashtag based on weighted probability
+    # Poplar hashtags appear more frequently
     hashtag = random.choices(
         list(HASHTAG_POPULARITY.keys()),
-        weights=HASHTAG_POPULARITY.values(),
+        weights= HASHTAG_POPULARITY.values(),
         k = 1
-    )[0] # returns a list but you only want the string within
+    )[0]
     
     return {
         "hashtag": hashtag,
-        "caption": fake.sentence(nb_words=10), # faker generates random sentence
-        "media_type": random.choice(MEDIA_TYPES) # icking one w equal probability
+        "caption": fake.sentence(nb_words=10),
+        "media_type": random.choice(MEDIA_TYPES)
     }
-
     
 def generate_engagement(user, content):
+    # Estimate likes, comments and shares based on popularity, engagement rate etc
+    # get engagment range for users category
     profile = USER_TYPES[user["user_type"]]
     
-    engagement_rate = random.uniform(
+    # pick a random engagement rate within allowed range
+    engagement_rate  = random.uniform(
         profile["engagement"][0],
         profile["engagement"][1]
     )
     
+    # Popular hashtags to slightly increase engagement
     hashtag_boost = 1 + (
         HASHTAG_POPULARITY[content["hashtag"]] / 100
+                           
     )
     
     media_boost = {
-        "text": 1.0,
+        "text": 1.0, 
         "image": 1.1,
         "video": 1.3
     }
@@ -119,18 +128,20 @@ def generate_engagement(user, content):
     comments = int(likes * random.uniform(0.05, 0.15))
     shares = int(likes * random.uniform(0.02, 0.10))
     
-    return {
+    return{
         "likes": likes,
         "comments": comments,
         "shares": shares
     }
 
 def generate_post():
+    # combine user data, content, engagement into single media post
+    # generate each component
     user = generate_user()
     content = generate_content()
     engagement = generate_engagement(user, content)
-    
-    return{
+
+    return {
         "post_id": fake.uuid4(),
         "timestamp": datetime.now().isoformat(),
         
@@ -139,8 +150,24 @@ def generate_post():
         **engagement
     }
 
-# post = generate_post()
-# print(post)
+def stream_posts():
+    # continuously generate posts and push them into Redis stream
+    # A new post is generated every second
+    while True:
+        post = generate_post()
+        
+        # Add post to Redis stream
+        # xadd() retrned the ID assigned by Redis
+        stream_id = redis_client.xadd(
+            STREAM_NAME,
+            post
+        )
+        
+        # Print the stream ID and hashtag for monitoring
+        print(f"Sent: {stream_id} | {post['hashtag']}")
+        
+        # Wait for 1 secons before generating the next post
+        time.sleep(1)
 
 if __name__ == "__main__":
     stream_posts()

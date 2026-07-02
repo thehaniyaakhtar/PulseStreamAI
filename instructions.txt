@@ -33,4 +33,10 @@ py -m venv venv
 .\venv\Scripts\Activate.ps1
 
 Step 4: producer.py
-Generate fake social media posts and push them into Redis streams
+Connects to Redis server
+Generates fake users, fake content, and engagement
+Combines everything into a single post dictionary
+Pushes he post to a Redis streams
+Repeats every second
+
+Step 5: consumer.py
