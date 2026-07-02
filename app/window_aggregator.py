@@ -15,7 +15,12 @@ current_window = defaultdict(
         "posts": 0,
         "likes": 0,
         "comments": 0,
-        "shares": 0
+        "shares": 0,
+        "impressions": 0,
+        "watch_time": 0,
+        "ctr": 0,
+        "sentiment": 0,
+        "engagement_velocity": 0
     }
 )
 
@@ -37,6 +42,18 @@ def update_window(post):
     current_window[hashtag]["comments"] += int(post["comments"])
     current_window[hashtag]["shares"] += int(post["shares"])
     
+    current_window[hashtag]["impressions"] += int(post["impressions"])
+
+    current_window[hashtag]["watch_time"] += float(post["watch_time"])
+
+    current_window[hashtag]["ctr"] += float(post["ctr"])
+
+    current_window[hashtag]["sentiment"] += float(post["sentiment"])
+
+    current_window[hashtag]["engagement_velocity"] += float(
+        post["engagement_velocity"]
+)
+    
 def finalize_window():
     # Creates one snapshot of the current time window
     # saves it and resets the counter to the next window
@@ -53,7 +70,12 @@ def finalize_window():
             "posts": stats["posts"],
             "likes": stats["likes"],
             "comments": stats["comments"],
-            "shares": stats["shares"]
+            "shares": stats["shares"],
+            "impressions": stats["impressions"],
+            "watch_time": stats["watch_time"],
+            "ctr": stats["ctr"],
+            "sentiment": stats["sentiment"],
+            "engagement_velocity": stats["engagement_velocity"]
         }
         
         # save it into historical dataset

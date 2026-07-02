@@ -69,3 +69,8 @@ Choose big enough datasets
 Set timeframe of 60 seconds
 Train model, a new model for each #, since each # has a different behavior
 Combining forecasts
+
+Phase 4: Trend Ranking + Anomaly Detection
+Loading data
+keeping only latest observed forecasts and metrics for each #
+merging everything

@@ -124,13 +124,42 @@ def generate_engagement(user, content):
         * media_boost[content["media_type"]]
     )
     
+    # Average watch time (seconds)
+    watch_time = round(
+        random.uniform(3, 60),
+        2
+    )
+
+    # Click-through rate
+    ctr = round(
+        random.uniform(1.5, 12),
+        2
+    )
+
+    # Sentiment score
+    sentiment = round(
+        random.uniform(-1, 1),
+        2
+    )
+
+    # Engagement velocity
+    engagement_velocity = round(
+        likes / random.uniform(5, 60),
+        2
+    )
+    
     comments = int(likes * random.uniform(0.05, 0.15))
     shares = int(likes * random.uniform(0.02, 0.10))
     
     return{
         "likes": likes,
         "comments": comments,
-        "shares": shares
+        "shares": shares,
+        "impressions": impressions,
+        "watch_time": watch_time,
+        "ctr": ctr,
+        "sentiment": sentiment,
+        "engagement_velocity": engagement_velocity
     }
 
 def generate_post():
