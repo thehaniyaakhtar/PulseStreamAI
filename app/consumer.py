@@ -2,6 +2,7 @@ import redis
 
 # import function that updates hashtag stats + dictionary that stores aggregated results
 from aggregator import update_summary, trend_summary
+from window_aggregator import process_post
 
 # Redis connection
 redis_client = redis.Redis(
@@ -39,7 +40,7 @@ def consume_posts():
             # (stream_id, post_dictionary)
             for stream_id, post in events:
                 # Update hashatg stats using this post
-                update_summary(post)
+                process_post(post)
                 
                 # print the latest aggregateed stats
                 print("\nCurrent Trend Summary")

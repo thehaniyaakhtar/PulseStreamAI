@@ -47,3 +47,11 @@ For each received post, call update_summary(post) to update hashtag stats
 Print current aggregated summary
 Update last_id so next xread fetches only newer posts
 Reapeat forever
+
+Step 6: window_aggregator.py
+Creating a dictionary for every different #
+Passing a function that for every #, posts, likes comments and shares are stored (current_window)
+for loop creates iterations for one # at a time
+row = {..} creates one record that weventually becomes one row in ML dataset
+aggregate all the hashtag + related info into rows
+store in csv

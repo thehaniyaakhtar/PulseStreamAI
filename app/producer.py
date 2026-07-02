@@ -108,8 +108,7 @@ def generate_engagement(user, content):
     
     # Popular hashtags to slightly increase engagement
     hashtag_boost = 1 + (
-        HASHTAG_POPULARITY[content["hashtag"]] / 100
-                           
+        HASHTAG_POPULARITY[content["hashtag"]] / 100                 
     )
     
     media_boost = {
