@@ -56,7 +56,7 @@ row = {..} creates one record/one row in ML dataset
 append all rows to windows_history, clear current_window to start the next time window
 export windows_history to csv using pd
 
-Phase 3: Feature Engineering
+Phase 3: feature_engineering.py
 Creating features like time and lag feature to record activity
 Defining metrics like growth rate, MA, engagement rate, trend score
 Handling missing values
@@ -73,7 +73,8 @@ Create future timestamp for next 30 mins
 Train model, a new model for each #, since each # has a different behavior
 Combining forecasts, save and print
 
-Phase 5: Trend Ranking + Anomaly Detection
+Phase 5: analytics.py
+Trend Ranking + Anomaly Detection
 Loading data
 keeping only latest observed forecasts and metrics for each #
 merging everything

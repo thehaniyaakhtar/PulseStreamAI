@@ -3,26 +3,37 @@ import numpy as np
 
 # Load Data
 ml_df = pd.read_csv("data/ml_dataset.csv")
+# Load Prophet  forecast generated earlier
 forecast_df = pd.read_csv("data/forecast.csv")
 
+# Convert timestamp cols to datetime format
 ml_df["timestamp"] = pd.to_datetime(ml_df["timestamp"])
+# Load the Prophet forecast generated earlier
 forecast_df["ds"] = pd.to_datetime(forecast_df["ds"])
 
 # Get Latest Snapshot Per Hashtag
+
+# sort all records by timestamp, group by hashtag
 latest = (
     ml_df
     .sort_values("timestamp")
     .groupby("hashtag")
-    .tail(1)
+    .tail(1) # keeps the latest record
 )
 
-# Get First Future Forecast
+# Get the most recent timestamp in the original dataset
 latest_time = ml_df["timestamp"].max()
 
+
+# Keep ONLY forecast calues that occur after the latest observed timestamp
 future = forecast_df[
     forecast_df["ds"] > latest_time
 ]
 
+
+# Sort forecast by time
+# Group by hashtag
+# Keep only the first future prediction
 future = (
     future
     .sort_values("ds")
@@ -31,7 +42,7 @@ future = (
     .reset_index()
 )
 
-# Merge
+# Merge the latest hashtag stats with predicted future values
 insights = latest.merge(
     future[
         [
@@ -46,17 +57,22 @@ insights = latest.merge(
 )
 
 # Fill Missing Forecasts
+# Replace missing values with 0
 insights["yhat"] = insights["yhat"].fillna(0)
 insights["yhat_lower"] = insights["yhat_lower"].fillna(0)
 insights["yhat_upper"] = insights["yhat_upper"].fillna(0)
 
 # Forecast Error
+
+# Positive: activity is higher than predicted value
+# Negative: activity is lower than predicted value
 insights["forecast_error"] = (
     insights["posts"] -
     insights["yhat"]
 )
 
 # Anomaly Detection
+# If error is greater than 30% of predicted values, #: anomalies
 insights["is_anomaly"] = (
     abs(insights["forecast_error"])
     >
@@ -64,6 +80,7 @@ insights["is_anomaly"] = (
 )
 
 # Normalize Features
+# List of features that are sused to calculate final trend score
 features = [
     "engagement_rate",
     "virality_score",
@@ -73,6 +90,7 @@ features = [
     "yhat"
 ]
 
+# Normlize each feature using min max scaling, 0-1 range via formula
 for feature in features:
     minimum = insights[feature].min()
     maximum = insights[feature].max()
@@ -86,6 +104,8 @@ for feature in features:
         )
 
 # Final Trend Score
+# Weighted combination of important features
+# Higher score > more trending hashtag
 insights["trend_rank_score"] = (
       0.35 * insights["yhat_norm"]
     + 0.25 * insights["engagement_rate_norm"]
@@ -97,15 +117,19 @@ insights["trend_rank_score"] = (
 
 # Trend Direction
 conditions = [
+    # Actual value is greater than prediction
     insights["forecast_error"] > 0,
+    # Less than prediction
     insights["forecast_error"] < 0
 ]
 
+# Labels corresponding to the condition
 choices = [
     "Rising",
     "Falling"
 ]
 
+# Assigning direction
 insights["direction"] = np.select(
     conditions,
     choices,
@@ -113,11 +137,13 @@ insights["direction"] = np.select(
 )
 
 # Ranking
+# Sort hashtags from highest trend score to lowest
 insights = insights.sort_values(
     "trend_rank_score",
     ascending=False
 )
 
+# Assign ranking numbers
 insights["rank"] = range(
     1,
     len(insights) + 1
