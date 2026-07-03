@@ -62,18 +62,22 @@ Defining metrics like growth rate, MA, engagement rate, trend score
 Handling missing values
 exporting to dataset
 
-Phase 4: Training model to make forecasts
-Import dataset
+Phase 4: forecast.py
+Training model to make forecasts
+Import dataset, converting time to required datatype
+Looping through every unique hashtag
 Renaming columns to Prophets requirements
-Choose big enough datasets
-Set timeframe of 60 seconds
+Choose big enough datasets (>10 cols)
+Train Prophet model
+Create future timestamp for next 30 mins
 Train model, a new model for each #, since each # has a different behavior
-Combining forecasts
+Combining forecasts, save and print
 
 Phase 5: Trend Ranking + Anomaly Detection
 Loading data
 keeping only latest observed forecasts and metrics for each #
 merging everything
 
-Phase 5: Streamlit Dashboard
+Phase 5: Dashboard.py
+Streamlit Dashboard
 Literally just AI generated
