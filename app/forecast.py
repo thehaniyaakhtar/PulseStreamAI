@@ -1,8 +1,10 @@
 import pandas as pd
 from prophet import Prophet
+from pathlib import Path
 
 # Load ML Dataset
-df = pd.read_csv("ml_dataset.csv")
+DATA_DIR = Path("data")
+df = pd.read_csv(DATA_DIR/"ml_dataset.csv")
 # Converting timestamp col from string to datetime format
 df["timestamp"] = pd.to_datetime(df["timestamp"])
 
@@ -12,12 +14,12 @@ df["timestamp"] = pd.to_datetime(df["timestamp"])
 all_forecasts = []
 
 # Train one Prophet model per #
-for hashtag in df["hastag"].unique():
+for hashtag in df["hashtag"].unique():
     print(f"Training model for {hashtag}: ")
     
     hashtag_df = (
         # Select rows belonging to #
-        df[df["hastag"] == hashtag]
+        df[df["hashtag"] == hashtag]
         [["timestamp", "trend_score"]].rename(
             columns={
                 "timestamp": "ds",
@@ -54,7 +56,7 @@ for hashtag in df["hastag"].unique():
         forecast[
             [
                 "hashtag",
-                "ds"
+                "ds",
                 "yhat",         # predicted trend score
                 "yhat_lower",   # lower confidence intervel
                 "yhat_upper"    # upper confidence interval
@@ -64,12 +66,12 @@ for hashtag in df["hastag"].unique():
 
 forecast_df = pd.concat(
     all_forecasts,
-    index = True
+    ignore_index = True
 )
 # merge all # forecasts to one df
 
 forecast_df.to_csv(
-    "forecast.csv",
+    DATA_DIR/"forecast.csv",
     index = False
 )
 # export the final forecast df to a csv file
